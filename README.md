@@ -54,7 +54,7 @@ sudo chown $USER:`id -gn` /var/log/apps/assemblage/
 ### OR Step 5b - Run your app using supervisor to run it in the background
 
 ```
-Copy assemblage.conf in the assemblage directory to /etc/supervisor/conf.d
+Copy /var/www/apps/github/assemblage/supervisor_conf/assemblage.conf in the assemblage directory to /etc/supervisor/conf.d
 sudo supervisorctl reread
 sudo supervisorctl update
 sudo supervisorctl restart assemblage
