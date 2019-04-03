@@ -10,6 +10,10 @@ from flask import json, jsonify, request
 import re
 import os
 import datetime
+from assemblage import datastorage
+
+db_file = app.config.get('DATABASE_FILE')
+db_object = datastorage.create_connection(db_file)
 
 @app.route('/')
 @app.route('/health')

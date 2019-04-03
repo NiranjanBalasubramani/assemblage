@@ -12,7 +12,7 @@ class BaseConfig(object):
     APP_HOST = os.environ.get('CONFIG_SYNC_HOST','0.0.0.0')
     APP_PORT = int(os.environ.get('CONFIG_SYNC_PORT',5025))
     APP_DEBUG = True
-    DATABASE_FILE = '/var/www/apps/assemblage/LibraryData.db'
+    DATABASE_FILE = '/var/www/apps/github/assemblage/LibraryData.db'
     LOG_FILE = '/var/log/apps/assemblage/application.log'
 
 class ProductionConfig(BaseConfig):
