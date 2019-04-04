@@ -21,6 +21,7 @@ class BaseConfig(object):
     BOOKS_TABLE = "booksinfo"
     BOOKS_INFO = "SELECT * FROM {} WHERE availability=1"
     BOOKS_UPDATE = "UPDATE booksinfo SET availability = 0 WHERE book_isbn = '{}'";
+    BOOKS_UPDATE_1 = "UPDATE booksinfo SET availability = 1 WHERE book_isbn = '{}'";
     BOOKS_DATA = "SELECT * FROM booksinfo WHERE book_isbn = '{}'"
     ADD_BOOK = "INSERT INTO booksinfo (book_isbn,book_title,book_author) values (?,?,?)"
     DELETE_BOOK = "DELETE FROM booksinfo WHERE book_isbn='{}'"
@@ -30,6 +31,9 @@ class BaseConfig(object):
     DELETE_USER = "DELETE FROM users WHERE uid={}"
     BORROW_TABLE = "borrowinfo"
     BORROW_DATA = "INSERT INTO borrowinfo (b_id,b_isbn,b_title,u_id,u_name,issue_date,expiry_date) values(?,?,?,?,?,?,?)"
+    BORROW_HISTORY = "SELECT b_isbn,b_title,issue_date,expiry_date FROM borrowinfo where u_id={}"
+    BORROW_HISTORY_1 = "SELECT b_isbn,u_id,u_name,issue_date FROM borrowinfo where b_isbn='{}'"
+    RETURN_BOOK = "INSERT INTO returninfo (r_id,b_isbn,u_id,u_name,issue_date,return_date) values (?,?,?,?,?,?)"
 
     # Info 
     NO_OF_DAYS = 7
