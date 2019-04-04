@@ -305,8 +305,7 @@ def borrow_book():
         user_details = check_user()
         user_name = request_data.get('user_name')
         user_id = request_data.get('user_id')            
-        if user_details.get(user_id):
-            
+        if user_details.get(user_id):            
             book_isbn = request_data.get('book_isbn')
             books_update_query = app.config.get('BOOKS_UPDATE').format(book_isbn)
             books_info_query = app.config.get('BOOKS_DATA').format(book_isbn)
@@ -361,6 +360,58 @@ def return_book():
     API that allows users to return books to the library.
     @return: json value with return_id.
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        user_details = check_user()
+        user_name = request_data.get('user_name')
+        user_id = request_data.get('user_id')            
+        if user_details.get(user_id):
+            book_isbn = request_data.get('book_isbn')
+            books_update1_query = app.config.get('BOOKS_UPDATE_1').format(book_isbn)            
+            update_book_info = datastorage.update_book(db_object,books_update1_query)
+            history_query = app.config.get('BORROW_HISTORY_1').format(book_isbn)                        
+            fetch_data = datastorage.query(db_object,history_query)
+            fetch_data = list(fetch_data[0])            
+            r_id = str(uuid.uuid1())
+            b_isbn = fetch_data[0]
+            u_id = fetch_data[1]
+            u_name = fetch_data[2]
+            issue_date = fetch_data[3]
+            return_date = datetime.datetime.now().strftime('%d/%m/%Y')
+            items = (r_id,b_isbn,u_id,u_name,issue_date,return_date)
+            add_return_query = app.config.get('RETURN_BOOK')            
+            return_details = datastorage.add(db_object,add_return_query,items)
+            data = []
+            return_data = {
+                "return_id" : r_id,
+                "message" : "{} book has been returned.".format(b_isbn)
+            }
+            data.append(return_data)
+            response = {
+                "http_status": 200,
+                "success": True,
+                "data": data
+            }
+            return jsonify(response),201            
+
+        else: 
+            response = {
+                "message" : "User doesn't have access to borrow books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
+    
+    except Exception as ex:
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
+
 
 @app.route('/v1/book_history')
 def book_history():
@@ -368,6 +419,50 @@ def book_history():
     API that returns book history of the user.
     @return: json value of all the books borrowed and returned by the user. 
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        user_details = check_user()
+        user_name = request_data.get('user_name')
+        user_id = request_data.get('user_id')            
+        if user_details.get(user_id):            
+            history_query = app.config.get('BORROW_HISTORY').format(user_id)                        
+            user_history = datastorage.query(db_object,history_query)            
+            data = []
+            for books in user_history:                
+                books = list(books)
+                book_data = {
+                    "book_isbn" : books[0],
+                    "book_name" : books[1],
+                    "issue_date" : books[2],
+                    "expiry_date": books[3]
+                }
+                data.append(book_data)
+            response = {
+                "http_status": 200,
+                "success": True,
+                "data": data
+            }
+            return jsonify(response),200                
+        else: 
+            response = {
+                "message" : "User doesn't have access to borrow books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
+    
+    except Exception as ex:
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
+
+
+    
 def check_admin():
     db_object = datastorage.create_connection(db_file)    
     admin_table = app.config.get('ADMIN_TABLE')
