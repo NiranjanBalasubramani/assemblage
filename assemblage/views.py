@@ -137,6 +137,44 @@ def manage_users():
     API that returns user info.
     @return: json value of all the users who can access the library of books. 
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        admin_details = check_admin()
+        admin_name = request_data.get('user_name')
+        admin_id = request_data.get('user_id')
+        if admin_details.get(admin_id):
+            user_table = app.config.get('USERS_TABLE')
+            user_query = app.config.get('USERS_INFO').format(user_table)            
+            user_details = datastorage.query_users(db_object,user_query)
+            data = []
+            for user in user_details:                
+                user = list(user)
+                user_data = {
+                    "uid" : user[0],
+                    "first_name" : user[1],
+                    "last_name" : user[2],
+                    "email_id" : user[3],
+                    "phone" : user[4]
+                }
+                data.append(user_data)
+            response = {
+                "http_status": 200,
+                "success": True,
+                "data": data
+            }
+            return jsonify(response),200
+        else: 
+            response = {
+                "message" : "User doesn't have access to check available books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
+                
+    except Exception as ex: 
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        return 500
 
 @app.route('/v1/add_user', methods=["POST"])
 def add_user():

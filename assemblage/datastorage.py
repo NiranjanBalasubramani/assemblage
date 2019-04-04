@@ -54,3 +54,13 @@ def delete_books(db_object, delete_book_query):
     pointer.execute(delete_book_query)
     rows = pointer.fetchall()
     return rows
+
+
+def query_users(db_object, user_query):
+    """
+    Returns the list of books.
+    """    
+    pointer = db_object.cursor()    
+    pointer.execute(user_query)    
+    rows = pointer.fetchall()    
+    return rows
