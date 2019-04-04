@@ -20,12 +20,19 @@ class BaseConfig(object):
     ADMINS = "SELECT * FROM {}"
     BOOKS_TABLE = "booksinfo"
     BOOKS_INFO = "SELECT * FROM {} WHERE availability=1"
+    BOOKS_UPDATE = "UPDATE booksinfo SET availability = 0 WHERE book_isbn = '{}'";
+    BOOKS_DATA = "SELECT * FROM booksinfo WHERE book_isbn = '{}'"
     ADD_BOOK = "INSERT INTO booksinfo (book_isbn,book_title,book_author) values (?,?,?)"
     DELETE_BOOK = "DELETE FROM booksinfo WHERE book_isbn='{}'"
-    USERS_TABLE = "users"
+    USERS_TABLE = "users"    
     USERS_INFO = "SELECT * FROM {}"
     ADD_USER = "INSERT INTO users (first_name,last_name,email_id,phone) values (?,?,?,?)"
     DELETE_USER = "DELETE FROM users WHERE uid={}"
+    BORROW_TABLE = "borrowinfo"
+    BORROW_DATA = "INSERT INTO borrowinfo (b_id,b_isbn,b_title,u_id,u_name,issue_date,expiry_date) values(?,?,?,?,?,?,?)"
+
+    # Info 
+    NO_OF_DAYS = 7
 
 
 class ProductionConfig(BaseConfig):

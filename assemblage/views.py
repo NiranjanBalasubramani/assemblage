@@ -11,6 +11,7 @@ import re
 import os
 import datetime
 from assemblage import datastorage
+import uuid
 
 db_file = app.config.get('DATABASE_FILE')
 
@@ -72,7 +73,12 @@ def book_info():
                 
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
   
 @app.route('/v1/add_book', methods=["POST"])
 def add_book():
@@ -101,10 +107,22 @@ def add_book():
             	"message": "The book {} has been added to the library".format(book_title)
             }
             return jsonify(response), 201
+        else: 
+            response = {
+                "message" : "User doesn't have access to add books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
     
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
 
 @app.route('/v1/delete_book', methods=["DELETE"])
 def delete_book():
@@ -126,10 +144,22 @@ def delete_book():
             inserted_details = datastorage.delete(db_object,delete_book_query)
             response = []
             return jsonify(response), 204
+        else: 
+            response = {
+                "message" : "User doesn't have access to delete books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
     
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
 
 @app.route('/v1/manage_users')
 def manage_users():
@@ -174,7 +204,12 @@ def manage_users():
                 
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
 
 @app.route('/v1/add_user', methods=["POST"])
 def add_user():
@@ -204,10 +239,22 @@ def add_user():
             	"message": "The user {} has been added to the library".format(first_name)
             }
             return jsonify(response), 201
+        else: 
+            response = {
+                "message" : "User doesn't have access to add another user.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
     
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
 
 @app.route('/v1/delete_user', methods=["DELETE"])
 def delete_user():
@@ -229,10 +276,22 @@ def delete_user():
             inserted_details = datastorage.delete(db_object,delete_user_query)
             response = []
             return jsonify(response), 204
-    
+        else: 
+            response = {
+                "message" : "User doesn't have access to delete another user.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
+
     except Exception as ex: 
         app.logger.debug("Server threw an exception: {}".format(ex))
-        return 500
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
 
 @app.route('/v1/borrow_book', methods=["POST"])
 def borrow_book():
@@ -240,6 +299,62 @@ def borrow_book():
     API that allows users to borrow books from the library.
     @return: json value consisting of issue_date and expiry_date of the book along with its info. 
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        user_details = check_user()
+        user_name = request_data.get('user_name')
+        user_id = request_data.get('user_id')            
+        if user_details.get(user_id):
+            
+            book_isbn = request_data.get('book_isbn')
+            books_update_query = app.config.get('BOOKS_UPDATE').format(book_isbn)
+            books_info_query = app.config.get('BOOKS_DATA').format(book_isbn)
+            update_book_info = datastorage.update_book(db_object,books_update_query)
+            retrieve_book_info = datastorage.update_book(db_object,books_info_query)
+            print("BIF: ",retrieve_book_info)
+            data = []
+            book_title = list(retrieve_book_info[0])[1]
+            print("bt: ",book_title)            
+            b_id = str(uuid.uuid1())
+            issue_date = datetime.datetime.now().strftime('%d/%m/%Y')
+            no_of_days = app.config.get("NO_OF_DAYS")
+            end_date = datetime.datetime.now().strptime(issue_date, '%d/%m/%Y') + datetime.timedelta(no_of_days)
+            expiry_date = end_date.strftime('%d/%m/%Y')
+            items = (b_id,book_isbn,book_title,user_id,user_name,issue_date,expiry_date)
+            add_borrow_query = app.config.get('BORROW_DATA')            
+            borrowed_details = datastorage.add(db_object,add_borrow_query,items)
+            borrow_data = {
+                "borrow_id" : b_id,
+                "book_isbn" : book_isbn,
+                "book_name" : book_title,
+                "issue_date" : issue_date,
+                "expiry_date" : expiry_date
+            }
+            data.append(borrow_data)
+            response = {
+                "http_status": 200,
+                "success": True,
+                "data": data
+            }
+            return jsonify(response),201            
+        else: 
+            response = {
+                "message" : "User doesn't have access to borrow books.",
+                "http_status": 403,
+                "success": False                
+            }
+            return jsonify(response),403
+    
+    except Exception as ex:
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        response = {
+                "message" : "Internal Server Error.",
+                "http_status": 500,
+                "success": False                
+            }
+        return jsonify(response),500
+    
 @app.route('/v1/return_book', methods=["PUT"])
 def return_book():
     """
@@ -254,9 +369,15 @@ def book_history():
     @return: json value of all the books borrowed and returned by the user. 
     """
 def check_admin():
-    db_object = datastorage.create_connection(db_file)
-    # pointer = db_object.cursor()
+    db_object = datastorage.create_connection(db_file)    
     admin_table = app.config.get('ADMIN_TABLE')
     admin_query = app.config.get('ADMINS').format(admin_table)
     admin_details = datastorage.query_admin(db_object,admin_query)
     return admin_details
+
+def check_user():
+    db_object = datastorage.create_connection(db_file)    
+    user_table = app.config.get('USERS_TABLE')
+    user_query = app.config.get('USERS_INFO').format(user_table)
+    user_details = datastorage.query_user(db_object,user_query)
+    return user_details

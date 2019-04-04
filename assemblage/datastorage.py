@@ -54,3 +54,26 @@ def delete(db_object, delete_query):
     pointer.execute(delete_query)
     rows = pointer.fetchall()
     return rows
+
+def query_user(db_object, user_query):
+    """
+    Returns the list of admins.
+    """
+    print("inside quering")
+    user_details = dict()
+    pointer = db_object.cursor()
+    pointer.execute(user_query)
+    rows = pointer.fetchall()
+    for row in rows:
+        row = list(row)
+        user_details[row[0]] = row[1]
+    return user_details
+
+def update_book(db_object, query):
+    """
+    Returns the list of books.
+    """    
+    pointer = db_object.cursor()    
+    pointer.execute(query)    
+    rows = pointer.fetchall()    
+    return rows
