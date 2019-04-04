@@ -15,6 +15,12 @@ class BaseConfig(object):
     DATABASE_FILE = '/var/www/apps/github/assemblage/LibraryData.db'
     LOG_FILE = '/var/log/apps/assemblage/application.log'
 
+    # Queries
+    ADMIN_TABLE = "admin"
+    ADMINS = "SELECT * FROM {}"
+    BOOKS_TABLE = "booksinfo"
+    BOOKS_INFO = "SELECT * FROM {} WHERE availability=1"
+
 class ProductionConfig(BaseConfig):
     """
     Production specific configurations.
