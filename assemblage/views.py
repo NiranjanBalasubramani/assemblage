@@ -80,6 +80,31 @@ def add_book():
     API that adds books to the library.
     @return: 201 created if books have been successfully added to the library.  
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        admin_details = check_admin()
+        admin_name = request_data.get('user_name')
+        admin_id = request_data.get('user_id')
+        if admin_details.get(admin_id):
+            books_table = app.config.get('BOOKS_TABLE')
+            request_data = request_data.get('data')[0]            
+            book_isbn = request_data.get('book_isbn')
+            book_title = request_data.get('book_name')
+            book_author = request_data.get('book_author')
+            items = (book_isbn,book_title,book_author)
+            add_book_query = app.config.get('ADD_BOOK')            
+            inserted_details = datastorage.add_books(db_object,add_book_query,items)
+            response = {
+                "http_status": 201,
+                "success": True,
+            	"message": "The book {} has been added to the library".format(book_title)
+            }
+            return jsonify(response), 201
+    
+    except Exception as ex: 
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        return 500
 
 @app.route('/v1/delete_book', methods=["DELETE"])
 def delete_book():
@@ -87,6 +112,24 @@ def delete_book():
     API that removes a book from the library.
     @return: 204 No Content. 
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        admin_details = check_admin()
+        admin_name = request_data.get('user_name')
+        admin_id = request_data.get('user_id')
+        if admin_details.get(admin_id):
+            books_table = app.config.get('BOOKS_TABLE')
+            request_data = request_data.get('data')[0]            
+            book_isbn = request_data.get('book_isbn')                        
+            delete_book_query = app.config.get('DELETE_BOOK').format(book_isbn)
+            inserted_details = datastorage.delete_books(db_object,delete_book_query)
+            response = []
+            return jsonify(response), 204
+    
+    except Exception as ex: 
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        return 500
 
 @app.route('/v1/manage_users')
 def manage_users():

@@ -8,7 +8,7 @@ def create_connection(database_file):
     @return: connection_object
     """
     try:        
-        connection = sqlite3.connect(database_file)
+        connection = sqlite3.connect(database_file, isolation_level=None)
         app.logger.debug("DEBUG: Database connection successful")
         return connection
     except Exception as ex:        
@@ -30,9 +30,27 @@ def query_admin(db_object, admin_query):
 
 def query_books(db_object, books_query):
     """
-    Returns the list of admins.
+    Returns the list of books.
     """    
     pointer = db_object.cursor()    
     pointer.execute(books_query)    
     rows = pointer.fetchall()    
+    return rows
+
+def add_books(db_object, add_book_query,items):
+    """
+    Inserts the list of books to the db.
+    """    
+    pointer = db_object.cursor()    
+    pointer.execute(add_book_query,items)
+    rows = pointer.fetchall()    
+    return rows
+
+def delete_books(db_object, delete_book_query):
+    """
+    Deletes the list of books from the db.
+    """    
+    pointer = db_object.cursor()    
+    pointer.execute(delete_book_query)
+    rows = pointer.fetchall()
     return rows

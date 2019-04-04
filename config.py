@@ -20,6 +20,9 @@ class BaseConfig(object):
     ADMINS = "SELECT * FROM {}"
     BOOKS_TABLE = "booksinfo"
     BOOKS_INFO = "SELECT * FROM {} WHERE availability=1"
+    ADD_BOOK = "INSERT INTO booksinfo (book_isbn,book_title,book_author) values (?,?,?)"
+    DELETE_BOOK = "DELETE FROM booksinfo WHERE book_isbn='{}'"
+
 
 class ProductionConfig(BaseConfig):
     """
