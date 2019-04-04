@@ -46,7 +46,7 @@ def book_info():
         if admin_details.get(admin_id):
             books_table = app.config.get('BOOKS_TABLE')
             books_query = app.config.get('BOOKS_INFO').format(books_table)            
-            books_details = datastorage.query_books(db_object,books_query)
+            books_details = datastorage.query(db_object,books_query)
             data = []
             for books in books_details:                
                 books = list(books)
@@ -94,7 +94,7 @@ def add_book():
             book_author = request_data.get('book_author')
             items = (book_isbn,book_title,book_author)
             add_book_query = app.config.get('ADD_BOOK')            
-            inserted_details = datastorage.add_books(db_object,add_book_query,items)
+            inserted_details = datastorage.add(db_object,add_book_query,items)
             response = {
                 "http_status": 201,
                 "success": True,
@@ -123,7 +123,7 @@ def delete_book():
             request_data = request_data.get('data')[0]            
             book_isbn = request_data.get('book_isbn')                        
             delete_book_query = app.config.get('DELETE_BOOK').format(book_isbn)
-            inserted_details = datastorage.delete_books(db_object,delete_book_query)
+            inserted_details = datastorage.delete(db_object,delete_book_query)
             response = []
             return jsonify(response), 204
     
@@ -146,7 +146,7 @@ def manage_users():
         if admin_details.get(admin_id):
             user_table = app.config.get('USERS_TABLE')
             user_query = app.config.get('USERS_INFO').format(user_table)            
-            user_details = datastorage.query_users(db_object,user_query)
+            user_details = datastorage.query(db_object,user_query)
             data = []
             for user in user_details:                
                 user = list(user)
@@ -182,6 +182,32 @@ def add_user():
     API that adds users to the library.
     @return: 201 created if users have been successfully added to the library.  
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        admin_details = check_admin()
+        admin_name = request_data.get('user_name')
+        admin_id = request_data.get('user_id')
+        if admin_details.get(admin_id):
+            user_table = app.config.get('BOOKS_TABLE')
+            request_data = request_data.get('data')[0]            
+            first_name = request_data.get('first_name')
+            last_name = request_data.get('last_name')
+            email_id = request_data.get('email_id')
+            phone = request_data.get('phone')
+            items = (first_name,last_name,email_id,phone)
+            add_user_query = app.config.get('ADD_USER')            
+            inserted_details = datastorage.add(db_object,add_user_query,items)
+            response = {
+                "http_status": 201,
+                "success": True,
+            	"message": "The user {} has been added to the library".format(first_name)
+            }
+            return jsonify(response), 201
+    
+    except Exception as ex: 
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        return 500
 
 @app.route('/v1/delete_user', methods=["DELETE"])
 def delete_user():
@@ -189,6 +215,24 @@ def delete_user():
     API that removes a user from library access.
     @return: 204 No Content. 
     """
+    try:        
+        db_object = datastorage.create_connection(db_file)
+        request_data = request.json
+        admin_details = check_admin()
+        admin_name = request_data.get('user_name')
+        admin_id = request_data.get('user_id')
+        if admin_details.get(admin_id):
+            user_table = app.config.get('USER_TABLE')
+            request_data = request_data.get('data')[0]            
+            u_id = request_data.get('u_id')                        
+            delete_user_query = app.config.get('DELETE_USER').format(u_id)
+            inserted_details = datastorage.delete(db_object,delete_user_query)
+            response = []
+            return jsonify(response), 204
+    
+    except Exception as ex: 
+        app.logger.debug("Server threw an exception: {}".format(ex))
+        return 500
 
 @app.route('/v1/borrow_book', methods=["POST"])
 def borrow_book():

@@ -24,6 +24,8 @@ class BaseConfig(object):
     DELETE_BOOK = "DELETE FROM booksinfo WHERE book_isbn='{}'"
     USERS_TABLE = "users"
     USERS_INFO = "SELECT * FROM {}"
+    ADD_USER = "INSERT INTO users (first_name,last_name,email_id,phone) values (?,?,?,?)"
+    DELETE_USER = "DELETE FROM users WHERE uid={}"
 
 
 class ProductionConfig(BaseConfig):

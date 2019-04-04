@@ -28,39 +28,29 @@ def query_admin(db_object, admin_query):
         admin_details[row[0]] = row[1]
     return admin_details
 
-def query_books(db_object, books_query):
+def query(db_object, query):
     """
     Returns the list of books.
     """    
     pointer = db_object.cursor()    
-    pointer.execute(books_query)    
+    pointer.execute(query)    
     rows = pointer.fetchall()    
     return rows
 
-def add_books(db_object, add_book_query,items):
+def add(db_object, add_query,items):
     """
     Inserts the list of books to the db.
     """    
     pointer = db_object.cursor()    
-    pointer.execute(add_book_query,items)
+    pointer.execute(add_query,items)
     rows = pointer.fetchall()    
     return rows
 
-def delete_books(db_object, delete_book_query):
+def delete(db_object, delete_query):
     """
     Deletes the list of books from the db.
     """    
     pointer = db_object.cursor()    
-    pointer.execute(delete_book_query)
+    pointer.execute(delete_query)
     rows = pointer.fetchall()
-    return rows
-
-
-def query_users(db_object, user_query):
-    """
-    Returns the list of books.
-    """    
-    pointer = db_object.cursor()    
-    pointer.execute(user_query)    
-    rows = pointer.fetchall()    
     return rows
